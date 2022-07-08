@@ -1,6 +1,8 @@
 #pragma once
 /*
-rust 基本数据类型
+struct and api between rust and unreal
+
+this file should be copied from UnrealRustInterface
 */
 #include <stdint.h>
 struct Position{
@@ -9,6 +11,7 @@ struct Position{
 };
 typedef void(*UELogCallback)(const char* log, int32_t log_level);
 typedef void* CVoidPtr;
+
 
 #define push_integers(L, ptr, len, tp, cap)\
 {\
