@@ -62,8 +62,40 @@ pub type uint16 = u16;
 pub type uint8 = u8;
 pub type int32 = i32;
 pub type uint32 = u32;
+pub type f32_ = f32;
+pub type f64_ = f64;
 
 pub type string = &'static str;
+pub use unreal::*;
+///unreal  binder impl
+mod unreal{
+	use super::*;
+	///rust api for unreal type FSphere
+	pub struct Sphere{
+		ptr: *mut std::ffi::c_void
+	}
+	pub type SphereIsInsideFPtr = unsafe extern "C" fn (this: *mut std::ffi::c_void, Other: *const std::ffi::c_void,Tolerance: f32) -> bool;
+	static mut SphereIsInsideCallback: Option<SphereIsInsideFPtr> = None;
+	#[no_mangle]
+	unsafe extern "C" fn RegisterSphereIsInside(fun: SphereIsInsideFPtr){
+		SphereIsInsideCallback = Some(fun);
+	}
+	impl Sphere{
+		#[inline] pub fn get_ptr(&self) -> *const std::ffi::c_void { self.ptr as *const _ }
+		#[inline] pub fn get_ptr_mut(&self) -> *mut std::ffi::c_void { self.ptr }
+		 pub unsafe fn IsInside(&self, Other: &Sphere, Tolerance: f32) -> bool{
+			SphereIsInsideCallback.as_ref().expect("FSphere::IsInside not registered!")(self.ptr, Other.get_ptr(), Tolerance)
+		}
+	}
+}//end of unreal
+///rust api for unreal type FVector
+pub struct Vector{
+	pub X: f32,
+	pub Y: f32,
+	pub Z: f32,
+}
+impl Vector{
+}
 pub use unreal_const::*;
 ///unreal_const  binder impl
 mod unreal_const{
