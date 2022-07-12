@@ -66,6 +66,13 @@ pub type f32_ = f32;
 pub type f64_ = f64;
 
 pub type string = &'static str;
+pub use unreal_const::*;
+///unreal_const  binder impl
+mod unreal_const{
+	use super::*;
+	const UNREAL_VERSION: string = "1";
+	const WORLD_LOOP_INTERVAL: int32 = 16;
+}//end of unreal_const
 pub use unreal::*;
 ///unreal  binder impl
 mod unreal{
@@ -74,8 +81,9 @@ mod unreal{
 	pub struct Sphere{
 		ptr: *mut std::ffi::c_void
 	}
-	pub type SphereIsInsideFPtr = unsafe extern "C" fn (this: *mut std::ffi::c_void, Other: *const std::ffi::c_void,Tolerance: f32) -> bool;
+	pub type SphereIsInsideFPtr = unsafe extern "C" fn (this: *mut std::ffi::c_void, Other: *const std::ffi::c_void, Tolerance: f32) -> bool;
 	static mut SphereIsInsideCallback: Option<SphereIsInsideFPtr> = None;
+	/// not to lua
 	#[no_mangle]
 	unsafe extern "C" fn RegisterSphereIsInside(fun: SphereIsInsideFPtr){
 		SphereIsInsideCallback = Some(fun);
@@ -96,10 +104,3 @@ pub struct Vector{
 }
 impl Vector{
 }
-pub use unreal_const::*;
-///unreal_const  binder impl
-mod unreal_const{
-	use super::*;
-	const UNREAL_VERSION: string = "1";
-	const WORLD_LOOP_INTERVAL: int32 = 16;
-}//end of unreal_const

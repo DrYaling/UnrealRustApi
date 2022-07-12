@@ -92,6 +92,7 @@ fn parse_headers(file_list: Vec<String>, root: String) -> anyhow::Result<()>{
     header.push("*/".to_string());
     header.push("#include <stdint.h>".to_string());
     header.push("#include \"type_wrapper.h\"".to_string());
+    header.push("#include \"RustBinders.h\"".to_string());
     /*    
     ("*mut i32".into(),"int32_t*".into()), 
     ("*mut u32".into(), "uint32_t*".into()), 
@@ -195,7 +196,7 @@ fn parse_file(file_path: String, header: &mut Vec<String>, cpp: &mut Vec<String>
     for index in 0..lines.len() {
         let line = lines[index];
         //println!("file {} line {} {}", file_path, index + 1, line);
-        if lines[index] == "#[no_mangle]"{
+        if lines[index].trim_start() == "#[no_mangle]"{
             parse_fn(lines[index + 1], header, cpp, &macros, c_sharp_api, lua_api, lua_info.clone())?;
             macros = "".to_string();
             c_sharp_api = false;
@@ -337,8 +338,8 @@ fn parse_fn(fn_name: &str, header: &mut Vec<String>, cpp: &mut Vec<String>, macr
         if super::PRIMARY_NAMES.contains(&pt){
             c_file_pm.push(format!("{} {}", super::C_PRIMARY_TYPE[&pt], pn));
         }
-        else if pt.contains("*") || pt.to_lowercase().contains("callback"){
-            if pt.to_lowercase().contains("callback"){
+        else if pt.contains("*") || pt.to_lowercase().contains("callback") || pt.to_lowercase().contains("fptr"){
+            if pt.to_lowercase().contains("callback") || pt.to_lowercase().contains("fptr"){
                 let type_def = if pt.contains("^"){
                     pt.split("^").collect::<Vec<_>>().last().cloned().unwrap().to_string()
                 }
@@ -502,10 +503,10 @@ pub static LUA_OUT_PARAMETERS: Lazy<BTreeMap<String, String>> = Lazy::new(||{
     map
 });
 fn parse_lua_api(api_name: &str, native_fn_name: &str, mut ret_list: Vec<String>, parameters: Vec<(String, String)>, lua_fn: &mut Vec<String>, lua_info: &LuaExplortInfo) -> anyhow::Result<()>{
-    if ret_list.iter().find(|name| name.to_lowercase().contains("callback")).is_some(){
+    if ret_list.iter().find(|name| name.to_lowercase().contains("callback") || name.to_lowercase().contains("fptr")).is_some(){
         return Ok(());
     }
-    if parameters.iter().find(|name| name.0.to_lowercase().contains("callback")).is_some(){
+    if parameters.iter().find(|name| name.0.to_lowercase().contains("callback") || name.0.to_lowercase().contains("fptr")).is_some(){
         return Ok(());
     }
     let mut call_result = ret_list.first().cloned().unwrap_or("".to_string());
@@ -544,7 +545,7 @@ fn parse_lua_api(api_name: &str, native_fn_name: &str, mut ret_list: Vec<String>
             }
         }
         else if let Some(lua_type) = get_lua_type(&tp){
-            //println!("rs tp {} to lua_type {}", tp, lua_type);
+            // println!("rs tp {} to lua_type {}", tp, lua_type);
             lua_fn.push(format!("\tCheckLuaType(L, {}, {});", arg_index, LUA_TYPE_WRAPPER[&lua_type]));
             let fn_name = get_lua_get_fn(&lua_type);
             if fn_name == "lua_tolightuserdata"{

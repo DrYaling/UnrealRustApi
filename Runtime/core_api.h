@@ -4,6 +4,7 @@ auto generated c header, do not modify this
 */
 #include <stdint.h>
 #include "type_wrapper.h"
+#include "RustBinders.h"
 typedef int32_t* I32Ptr;
 typedef uint32_t* U32Ptr;
 typedef const int32_t* CI32Ptr;
@@ -17,4 +18,5 @@ extern "C"{
     bool SetRustLogLevel(int32_t log_level);
     void TestRustLog(int32_t level);
     void BindDebugLogger(UELogCallback/*wraper of UELogCallback*/ func);
+    void RegisterSphereIsInside(SphereIsInsideFPtr/*wraper of SphereIsInsideFPtr*/ fun);
 }

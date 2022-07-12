@@ -5,14 +5,8 @@ struct and api between rust and unreal
 this file should be copied from UnrealRustInterface
 */
 #include <stdint.h>
-struct Position{
-    int32_t x;
-    int32_t y;
-};
 typedef void(*UELogCallback)(const char* log, int32_t log_level);
 typedef void* CVoidPtr;
-
-
 #define push_integers(L, ptr, len, tp, cap)\
 {\
 	lua_createtable(L, 0, 0); \
